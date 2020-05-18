@@ -12,6 +12,9 @@ struct ContentView: View {
   @State private var usedWords = [String]()
   @State private var rootword = ""
   @State private var newWord = ""
+  @State private var errorTitle = ""
+  @State private var errorMessage = ""
+  @State private var showingError = false
   
   func addNewWord(){
     let answer = newWord.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
@@ -38,6 +41,37 @@ struct ContentView: View {
     fatalError("Could not load start.txt from bundle.")
   }
   
+  func isOriginal(word: String) -> Bool {
+    !usedWords.contains(word)
+  }
+  
+  func isPossible(word: String) -> Bool {
+    var tempWord = rootword
+    
+    for letter in word {
+      if let pos = tempWord.firstIndex(of: letter){
+        tempWord.remove(at: pos)
+      } else {
+        return false
+      }
+    }
+    return true
+  }
+  
+  func isReal(word: String) -> Bool {
+    let checker = UITextChecker()
+    let rang = NSRange(location: 0, length: word.utf16.count)
+    let misspelledRange = checker.rangeOfMisspelledWord(in: word, range: rang, startingAt: 0, wrap: false, language: "en")
+    
+    return misspelledRange.location == NSNotFound
+  }
+  
+  func wordError(title: String, message : String) {
+    errorTitle = title
+    errorMessage = message
+    showingError = true
+  }
+  
   var body: some View {
     NavigationView {
       VStack{
@@ -55,7 +89,10 @@ struct ContentView: View {
       .padding()
       .navigationBarTitle(rootword)
     }
-  .onAppear(perform: startGame)
+    .onAppear(perform: startGame)
+    .alert(isPresented: $showingError) {
+      Alert(title: Text(errorTitle), message: Text(errorMessage), dismissButton: .default(Text("ok")))
+    }
   }
 }
 

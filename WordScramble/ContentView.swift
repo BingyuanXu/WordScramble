@@ -22,6 +22,20 @@ struct ContentView: View {
     guard answer.count > 0 else {
       return
     }
+    guard isOriginal(word: answer) else {
+        wordError(title: "Word used already", message: "Be more original")
+        return
+    }
+
+    guard isPossible(word: answer) else {
+        wordError(title: "Word not recognized", message: "You can't just make them up, you know!")
+        return
+    }
+
+    guard isReal(word: answer) else {
+        wordError(title: "Word not possible", message: "That isn't a real word.")
+        return
+    }
     
     usedWords.insert(answer, at: 0)
     newWord = ""
